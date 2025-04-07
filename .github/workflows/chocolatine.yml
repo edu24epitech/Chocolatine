@@ -25,7 +25,6 @@ jobs:
         run: |
           if [ -f coding-style-reports.log ]; then
             while IFS= read -r line; do
-              # Assuming the log file contains lines in the format: "file:line: error message"
               file=$(echo "$line" | cut -d':' -f1)
               line_number=$(echo "$line" | cut -d':' -f2)
               message=$(echo "$line" | cut -d':' -f3-)
@@ -41,3 +40,36 @@ jobs:
             echo "Coding style errors found. Failing the job."
             exit 1
           fi
+
+  check_program_compilation:
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run make with timeout
+        run: |
+          timeout 2m make
+          if [ $? -ne 0 ]; then
+            echo "::error::Compilation timed out or failed."
+            exit 1
+          fi
+
+      - name: Run make clean
+        run: make clean
+
+      - name: Check executables
+        run: |
+          IFS=',' read -ra executables <<< "$EXECUTABLES"
+          for executable in "${executables[@]}"; do
+            if [ ! -f "$executable" ]; then
+              echo "::error file=$executable::Executable $executable is missing."
+              exit 1
+            fi
+            if [ ! -x "$executable" ]; then
+              echo "::error file=$executable::File $executable is not executable."
+              exit 1
+            fi
+          done
