@@ -57,14 +57,21 @@ jobs:
             exit 1
           fi
 
+      - name: List files after make
+        run: ls -R
+
       - name: Run make clean
         run: make clean
 
       - name: Check executables
         run: |
+          echo "Checking executables: $EXECUTABLES"
           echo "$EXECUTABLES" | tr ',' '\n' | while read -r executable; do
             if [ ! -f "$executable" ]; then
               echo "::error file=$executable::Executable $executable is missing."
+              echo "Current directory: $(pwd)"
+              echo "Files in directory:"
+              ls -R
               exit 1
             fi
             if [ ! -x "$executable" ]; then
