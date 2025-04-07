@@ -62,8 +62,7 @@ jobs:
 
       - name: Check executables
         run: |
-          IFS=',' read -ra executables <<< "$EXECUTABLES"
-          for executable in "${executables[@]}"; do
+          echo "$EXECUTABLES" | tr ',' '\n' | while read -r executable; do
             if [ ! -f "$executable" ]; then
               echo "::error file=$executable::Executable $executable is missing."
               exit 1
