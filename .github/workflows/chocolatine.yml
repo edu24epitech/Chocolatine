@@ -10,7 +10,7 @@ env:
   EXECUTABLES: "mysh,directory1/executableA"
 jobs:
   check_coding_style:
-    if: github.repository != env.MIRROR_URL
+    if: "!contains(env.MIRROR_URL, github.repository)"
     container:
       image: ghcr.io/epitech/coding-style-checker:latest
     steps:
