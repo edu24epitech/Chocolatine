@@ -20,20 +20,24 @@ jobs:
       - name: Run coding style check
         run: bash check.sh $(pwd) $(pwd)
 
-      - name: Upload coding style report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coding-style-reports.log
-          path: coding-style-reports.log
-
       - name: Annotate coding style errors
-        if: failure()
+        if: always()
         run: |
-          while IFS= read -r line; do
-            echo "::error file=${{ github.workspace }}/$line::Coding style error"
-          done < coding-style-reports.log
+          if [ -f coding-style-reports.log ]; then
+            while IFS= read -r line; do
+              # Assuming the log file contains lines in the format: "file:line: error message"
+              file=$(echo "$line" | cut -d':' -f1)
+              line_number=$(echo "$line" | cut -d':' -f2)
+              message=$(echo "$line" | cut -d':' -f3-)
+              echo "::error file=$file,line=$line_number::$message"
+            done < coding-style-reports.log
+          else
+            echo "No coding style report found."
+          fi
 
       - name: Fail job if errors found
-        if: failure()
-        run: exit 1
+        run: |
+          if [ -s coding-style-reports.log ]; then
+            echo "Coding style errors found. Failing the job."
+            exit 1
+          fi
