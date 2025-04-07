@@ -1,10 +1,10 @@
 on:
   push:
     branches-ignore:
-      - 'ga-ignore-**'
+      - "ga-ignore-**"
   pull_request:
     branches-ignore:
-      - 'ga-ignore-**'
+      - "ga-ignore-**"
 env:
   MIRROR_URL: "git@github.com:EpitechPGEPromo2029/B-DOP-200-BAR-2-1-chocolatine-eduardo.window.git"
   EXECUTABLES: "mysh,directory1/executableA"
@@ -42,40 +42,40 @@ jobs:
           fi
 
   check_program_compilation:
-    runs-on: ubuntu-latest
-    container:
-      image: epitechcontent/epitest-docker
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+            runs-on: ubuntu-latest
+            container:
+              image: epitechcontent/epitest-docker
+            steps:
+              - name: Checkout code
+                uses: actions/checkout@v3
 
-      - name: Run make with timeout
-        run: |
-          timeout 2m make
-          if [ $? -ne 0 ]; then
-            echo "::error::Compilation timed out or failed."
-            exit 1
-          fi
+              - name: Run make with timeout
+                run: |
+                  timeout 2m make
+                  if [ $? -ne 0 ]; then
+                    echo "::error::Compilation timed out or failed."
+                    exit 1
+                  fi
 
-      - name: List files after make
-        run: ls -R
+              - name: List files after make
+                run: ls -R
 
-      - name: Run make clean
-        run: make clean
+              - name: Run make clean
+                run: make clean
 
-      - name: Check executables
-        run: |
-          echo "Checking executables: $EXECUTABLES"
-          echo "$EXECUTABLES" | tr ',' '\n' | while read -r executable; do
-            if [ ! -f "$executable" ]; then
-              echo "::error file=$executable::Executable $executable is missing."
-              echo "Current directory: $(pwd)"
-              echo "Files in directory:"
-              ls -R
-              exit 1
-            fi
-            if [ ! -x "$executable" ]; then
-              echo "::error file=$executable::File $executable is not executable."
-              exit 1
-            fi
-          done
+              - name: Check executables
+                run: |
+                  echo "Checking executables: $EXECUTABLES"
+                  echo "$EXECUTABLES" | tr ',' '\n' | while read -r executable; do
+                    if [ ! -f "$executable" ]; then
+                      echo "::error file=$executable::Executable $executable is missing."
+                      echo "Current directory: $(pwd)"
+                      echo "Files in directory:"
+                      ls -R
+                      exit 1
+                    fi
+                    if [ ! -x "$executable" ]; then
+                      echo "::error file=$executable::File $executable is not executable."
+                      exit 1
+                    fi
+                  done
